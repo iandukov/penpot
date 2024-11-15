@@ -313,7 +313,8 @@
 (defn set-html!
   [^js el html]
   (when (some? el)
-    (set! (.-innerHTML el) html)))
+    (set! (.-innerHTML el) html))
+  el)
 
 (defn append-child!
   [^js el child]
@@ -625,7 +626,8 @@
 (defn set-data!
   [^js node ^string attr value]
   (when (some? node)
-    (.setAttribute node (dm/str "data-" attr) (dm/str value))))
+    (.setAttribute node (dm/str "data-" attr) (dm/str value)))
+  node)
 
 (defn set-attribute! [^js node ^string attr value]
   (when (some? node)
