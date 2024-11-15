@@ -11,38 +11,104 @@
    #?(:clj [clojure.core :as c])
    #?(:cljs [app.common.uuid-impl :as impl])
    #?(:cljs [cljs.core :as c])
+   #?(:cljs [goog.array :as garray])
    [app.common.data.macros :as dm])
   #?(:clj (:import
            app.common.UUIDv8
            java.util.UUID
            java.nio.ByteBuffer)))
 
-(def zero #uuid "00000000-0000-0000-0000-000000000000")
+#?(:cljs
+   (defprotocol IUUIDOps
+     (get-u32 [_])))
 
-(defn zero?
-  [v]
-  (= zero v))
+#?(:cljs
+   (deftype CUUID [uuid ^:mutable __u32_buffer ^:mutable __hash]
+     cljs.core/IUUID
 
-(defn next
-  []
-  #?(:clj (UUIDv8/create)
-     :cljs (impl/v8)))
+     Object
+     (toString [_] uuid)
+     (equiv [this other]
+       (-equiv this other))
 
-(defn random
-  "Alias for clj-uuid/v4."
-  []
-  #?(:clj (UUID/randomUUID)
-     :cljs (impl/v4)))
+     IEquiv
+     (-equiv [_ other]
+       (and (implements? IUUID other) (identical? uuid (.-uuid ^CUUID other))))
+
+     IPrintWithWriter
+     (-pr-writer [_ writer _]
+       (-write writer (str "#uuid \"" uuid "\"")))
+
+     IUUIDOps
+     (get-u32 [_]
+       (when (nil? __u32_buffer)
+         (set! __u32_buffer (impl/parse-u32 uuid)))
+       __u32_buffer)
+
+     IHash
+     (-hash [this]
+       (when (nil? __hash)
+         (set! __hash (hash uuid)))
+       __hash)
+
+     IComparable
+     (-compare [this other]
+       (if (instance? CUUID other)
+         (garray/defaultCompare uuid (.-uuid other))
+         (throw (js/Error. (str "Cannot compare " this " to " other)))))))
+
+
+#?(:cljs
+   (def buffer-sym (js/Symbol "buffer")))
+
+#?(:cljs
+   (extend-type UUID
+     IUUIDOps
+     (get-u32 [this]
+       (let [buffer (unchecked-get this "__buffer")]
+         ;; (js/console.log "get-u32" (some? buffer))
+         (if (nil? buffer)
+           (let [buffer (impl/parse-u32 (.-uuid ^UUID this))]
+             (unchecked-set this "__buffer" buffer)
+             buffer)
+           buffer)))))
+
+(def ^:private uuid-re
+  #"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
 
 (defn uuid
   "Parse string uuid representation into proper UUID instance."
   [s]
   #?(:clj (UUID/fromString s)
-     :cljs (c/parse-uuid s)))
+     :cljs (c/uuid s) #_(CUUID. s nil nil)))
+
+(defn parse
+  [s]
+  (prn "uuid/parse" s)
+  (if (string? s)
+    (some->> (re-matches uuid-re s) uuid)
+    nil))
+
+(defn next
+  []
+  #?(:clj (UUIDv8/create)
+     :cljs (uuid (impl/v8))))
+
+(defn random
+  "Alias for clj-uuid/v4."
+  []
+  #?(:clj (UUID/randomUUID)
+     :cljs (uuid (impl/v4))))
 
 (defn custom
-  ([a] #?(:clj (UUID. 0 a) :cljs (c/parse-uuid (impl/custom 0 a))))
-  ([b a] #?(:clj (UUID. b a) :cljs (c/parse-uuid (impl/custom b a)))))
+  ([a] #?(:clj (UUID. 0 a) :cljs (uuid (impl/custom 0 a))))
+  ([b a] #?(:clj (UUID. b a) :cljs (uuid (impl/custom b a)))))
+
+(def zero (uuid "00000000-0000-0000-0000-000000000000"))
+
+(defn zero?
+  [v]
+  (= zero v))
 
 #?(:clj
    (defn get-word-high

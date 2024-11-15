@@ -15,6 +15,7 @@
    [app.common.transit :as t]
    [app.common.types.file :as ctf]
    [app.common.uuid :as uuid]
+   [app.common.uuid-impl :as uuid.impl]
    [app.main.data.changes :as dwc]
    [app.main.data.dashboard.shortcuts]
    [app.main.data.preview :as dp]
@@ -453,3 +454,36 @@
 (defn ^:export enable-text-v2
   []
   (st/emit! (features/enable-feature "text-editor/v2")))
+
+(def void (volatile! nil))
+
+(defn ^:export bench
+  []
+  (let [id (uuid/next)]
+
+    ;; (js/console.log (uuid/get-u32 id))
+    ;; (js/console.log id)
+    ;; (js/console.log (pr-str id))
+    ;; (js/console.log (str id))
+    ;; (js/console.log (uuid? id))
+    ;; (js/console.log "KAKA"  (= (cljs.core/uuid (str id)) id))
+
+    ;; (js/console.log (t/encode-str id))
+    ;; (js/console.log (t/decode-str (t/encode-str id)))
+
+    ;; (simple-benchmark [id id]
+    ;;   (vreset! void (uuid/uuid->u32 id))
+    ;;   10000000)
+    ;; (simple-benchmark [id id]
+    ;;   (vreset! void (uuid/get-u32 id))
+    ;;   10000000)
+
+    (simple-benchmark [id id]
+      (vreset! void (uuid/uuid->u32 id))
+      1000000)
+    (simple-benchmark [id id]
+      (vreset! void (uuid/get-u32 id))
+      1000000)
+    )
+
+  )

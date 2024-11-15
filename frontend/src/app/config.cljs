@@ -70,7 +70,8 @@
    :enable-onboarding-newsletter
    :enable-dashboard-templates-section
    :enable-google-fonts-provider
-   :enable-component-thumbnails])
+   :enable-component-thumbnails
+   :enable-feature-text-editor-v2])
 
 (defn- parse-flags
   [global]

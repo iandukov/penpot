@@ -10,6 +10,7 @@
    #?(:cljs ["luxon" :as lxn])
    [app.common.data :as d]
    [app.common.uri :as uri]
+   [app.common.uuid :as uuid]
    [cognitect.transit :as t]
    [lambdaisland.uri :as luri]
    [linked.map :as lkm]
@@ -115,9 +116,19 @@
     {:id "n"
      :rfn (fn [value]
             (js/parseInt value 10))})
+
+ ;; #?(:cljs
+ ;;    {:id "penpot/uuid"
+ ;;     :class uuid/CUUID
+ ;;     :rfn uuid/parse
+ ;;     :wfn (fn [u]
+ ;;            (prn "wfn1" u (str u))
+ ;;            (str u))
+ ;;     })
  #?(:cljs
     {:id "u"
-     :rfn parse-uuid})
+     :rfn uuid/parse
+     })
 
  {:id "ordered-map"
   :class #?(:clj LinkedMap :cljs lkm/LinkedMap)
