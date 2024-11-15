@@ -9,8 +9,10 @@
   (:require
    [app.common.data :as d]
    [app.common.data.macros :as dm]
+   [app.common.types.shape.impl :as shape.impl]
    [app.main.data.workspace :as dw]
    [app.main.data.workspace.shapes :as dwsh]
+   [app.main.data.workspace.state-helpers :as wsh]
    [app.main.store :as st]
    [app.main.ui.components.numeric-input :refer [numeric-input*]]
    [app.main.ui.components.select :refer [select]]
@@ -51,6 +53,11 @@
         option-highlighted? (get state :option-highlighted?)
         preview-complete?   (get state :preview-complete?)
 
+        shapes (->
+                (wsh/lookup-page-objects @st/state)
+                (select-keys ids)
+                vals)
+
         on-change
         (mf/use-fn
          (mf/deps ids)
@@ -75,6 +82,10 @@
            (swap! state* assoc
                   :preview-complete? false
                   :option-highlighted? true)
+
+           (binding [shape.impl/*wasm-sync* true]
+             (doseq [shape shapes]
+               (let [_ (assoc shape :blend-mode value)])))
            (st/emit! (dw/set-preview-blend-mode ids value))))
 
         handle-blend-mode-leave
