@@ -44,6 +44,6 @@ async function watch() {
 if (process.argv.includes("--watch")) {
   await watch();
 } else {
-  const localConfig = { ...config, minify: true };
+  const localConfig = { ...config, minify: false };
   await esbuild.build(localConfig);
 }

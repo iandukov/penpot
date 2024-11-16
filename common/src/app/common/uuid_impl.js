@@ -192,6 +192,11 @@ goog.scope(function() {
       }
     };
 
+    const fromArray = (u8data) => {
+      int8.set(u8data);
+      return encoding.bufferToHex(int8, true);
+    }
+
     const setTag = (tag) => {
       tag = BigInt.asUintN(64, "" + tag);
       if (tag > 0x0000_0000_0000_000fn) {
@@ -205,10 +210,11 @@ goog.scope(function() {
 
     factory.create = create;
     factory.setTag = setTag;
+    factory.fromArray = fromArray;
     return factory;
   })();
 
-  self.short_v8 = function(uuid) {
+  self.shortV8 = function(uuid) {
     const buff = encoding.hexToBuffer(uuid);
     const short =  new Uint8Array(buff, 4);
     return encoding.bufferToBase62(short);
@@ -220,10 +226,27 @@ goog.scope(function() {
     return `${most.substring(0, 8)}-${most.substring(8, 12)}-${most.substring(12)}-${least.substring(0, 4)}-${least.substring(4)}`;
   };
 
+  self.fromBytes = function(data) {
+    if (data instanceof Uint8Array) {
+      return self.v8.fromArray(data);
+    } else if (data instanceof Int8Array) {
+      data = Uint8Array.from(data);
+      return self.v8.fromArray(data);
+    } else {
+      let buffer = data?.buffer;
+      if (buffer instanceof ArrayBuffer) {
+        data = new Uint8Array(buffer);
+        return self.v8.fromArray(data);
+      } else {
+        throw new Error("invalid array type received");
+      }
+    }
+  };
+
   // Code based from uuidjs/parse.ts
-  self.parse_u32 = function parse(uuid) {
+  self.getBytes = function parse(uuid) {
     const buffer = new ArrayBuffer(16);
-    const view = new Uint8Array(buffer);
+    const view = new Int8Array(buffer);
     let rest;
 
     // Parse ########-....-....-....-............
@@ -253,10 +276,15 @@ goog.scope(function() {
     view[14] = (rest >>> 8) & 0xff;
     view[15] = rest & 0xff;
 
-    return new Uint32Array(buffer);
-  };
+    return view;
+  }
 
-  self.get_u32 = (function() {
+  self.getUint32Array = function parse(uuid) {
+    const bytes = self.get_bytes(uuid);
+    return new Uint32Array(bytes.buffer);
+  }
+
+  self.get_u32_old = (function() {
     const UUID_BYTE_SIZE = 16;
     const ab = new ArrayBuffer(UUID_BYTE_SIZE);
     const u32buffer = new Uint32Array(ab);

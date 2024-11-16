@@ -117,17 +117,9 @@
      :rfn (fn [value]
             (js/parseInt value 10))})
 
- ;; #?(:cljs
- ;;    {:id "penpot/uuid"
- ;;     :class uuid/CUUID
- ;;     :rfn uuid/parse
- ;;     :wfn (fn [u]
- ;;            (prn "wfn1" u (str u))
- ;;            (str u))
- ;;     })
  #?(:cljs
     {:id "u"
-     :rfn uuid/parse
+     :rfn uuid/uuid
      })
 
  {:id "ordered-map"

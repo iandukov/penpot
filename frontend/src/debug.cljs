@@ -459,31 +459,30 @@
 
 (defn ^:export bench
   []
-  (let [id (uuid/next)]
+  (let [id (uuid "0227df82-63d7-8016-8005-48d9c0f33011")]
+    (js/console.log id)
+    (js/console.log (uuid/get-bytes id))
+    (js/console.log (uuid/from-bytes (uuid/get-bytes id)))
 
-    ;; (js/console.log (uuid/get-u32 id))
-    ;; (js/console.log id)
-    ;; (js/console.log (pr-str id))
-    ;; (js/console.log (str id))
-    ;; (js/console.log (uuid? id))
-    ;; (js/console.log "KAKA"  (= (cljs.core/uuid (str id)) id))
-
-    ;; (js/console.log (t/encode-str id))
-    ;; (js/console.log (t/decode-str (t/encode-str id)))
+    (js/console.log (uuid/get-u32 id))
+    (js/console.log (uuid/uuid->u32 id))
+    (js/console.log id)
 
     ;; (simple-benchmark [id id]
-    ;;   (vreset! void (uuid/uuid->u32 id))
-    ;;   10000000)
+    ;;   (vreset! void (uuid/get-u32 id))
+    ;;   50000000)
+
     ;; (simple-benchmark [id id]
     ;;   (vreset! void (uuid/get-u32 id))
     ;;   10000000)
 
-    (simple-benchmark [id id]
-      (vreset! void (uuid/uuid->u32 id))
-      1000000)
-    (simple-benchmark [id id]
-      (vreset! void (uuid/get-u32 id))
-      1000000)
+    ;; (simple-benchmark [id id]
+    ;;   (vreset! void (uuid/get-u32-2 id))
+    ;;   50000000)
+
+    ;; (simple-benchmark [id id]
+    ;;   (vreset! void (uuid/get-u32-3 id))
+    ;;   50000000)
     )
 
   )

@@ -17,6 +17,7 @@
 
   selmer/selmer {:mvn/version "1.12.61"}
   criterium/criterium {:mvn/version "0.4.6"}
+  com.fasterxml.uuid/java-uuid-generator {:mvn/version "5.1.0"}
 
   metosin/jsonista {:mvn/version "0.3.11"}
   metosin/malli {:mvn/version "0.16.4"}
